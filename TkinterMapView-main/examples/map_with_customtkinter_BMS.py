@@ -1,6 +1,7 @@
 import customtkinter
 from tkintermapview import TkinterMapView
 from tower_location_BMS import add_new_marker_label
+from geopy.distance import great_circle
 
 import os
 import tkinter
@@ -18,7 +19,7 @@ class App(customtkinter.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        src = "D:\\drone\\New folder\\test";
+        src = "D:\\drone\\New folder\\test\\";
 
         print(os.getcwd());
         os.chdir(src);
@@ -149,6 +150,7 @@ class App(customtkinter.CTk):
                                                 width=90,
                                                 command=self.rename_event)
         self.button_entry.grid(row=2, column=4, sticky="w", padx=(12, 0), pady=12)
+        self.button_entry.bind("<Return>", self.rename_event)
 
         self.button_next = customtkinter.CTkButton(master=self.frame_right,
                                                     text="Next",
