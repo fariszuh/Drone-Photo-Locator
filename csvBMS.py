@@ -10,7 +10,7 @@ def read_csv_from_row(csv_filepath, txt_filepath, start_row_index):
 
         with open(txt_filepath, 'w') as file:
             # pass  # The 'pass' statement does nothing, but the act of opening in 'w' mode empties the file.
-            file.write("def add_new_marker_label(self):" + '\n')
+            file.write("points_data = [\n")
         print(f"Content of '{txt_filepath}' has been removed.")
 
         path = "    path = self.map_widget.set_path(["
@@ -23,16 +23,14 @@ def read_csv_from_row(csv_filepath, txt_filepath, start_row_index):
                 point_towerlabel = row[1] # label of latlong point
                 lat,long,label = split_into_latlong(point_latlong,point_towerlabel)
                 # print(latlong,label)
-                path = path + "marker_" + str(i) + ".position,"
-                updated_row = "    marker_" + str(i) + " = " + "self.map_widget.set_marker(" + lat + "," + long + ", text=\"" + label + "\")"
+
+                updated_row = "        (" + lat + ", " + long + ", " + '"' + label + '"' + "),"
                 # print(updated_row)
                 with open(txt_filepath, 'a') as txtfile:
                     txtfile.write(''.join(updated_row) + '\n')
-        path = path + "])"
-        print(path)
-        with open(txt_filepath, 'a') as txtfile:
-            txtfile.write(''.join(path) + '\n')
 
+        with open(txt_filepath, 'a') as txtfile:
+            txtfile.write(''.join(']') + '\n')
 
 def split_into_latlong(point_latlong,point_towerlabel):
     print(point_latlong)
@@ -46,4 +44,4 @@ def split_into_latlong(point_latlong,point_towerlabel):
 
 # Example usage:
 # Assuming 'data.csv' has headers in the first row and data starts from the second row (index 1)
-read_csv_from_row('BMS no UPT.csv', 'tower_location_BMS.py', 2)
+read_csv_from_row('BMS no UPT.csv', 'tower_location_BMS_pointdata.py', 2)
