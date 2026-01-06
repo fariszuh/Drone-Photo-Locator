@@ -1,6 +1,7 @@
 import customtkinter
 from tkintermapview import TkinterMapView
-from tower_location_BMS import add_new_marker_label
+# from tower_location_BMS_pointdata import add_new_marker_label
+import tower_location_BMS_pointdata
 from geopy.distance import great_circle
 
 import os
@@ -162,7 +163,19 @@ class App(customtkinter.CTk):
         # # Button to perform rename
         # tk.Button(root, text="Rename File", command=perform_rename).grid(row=2, column=1, padx=5, pady=10)
 
-        add_new_marker_label(self)
+        # add_new_marker_label(self) # uncomment this function to call tower_location_BMS.py (syntax using set_marker -> too long)
+        # add_new_marker_label(self)
+
+        markers = []
+        jalur = []
+        for lat, lon, name in tower_location_BMS_pointdata.points_data:
+            marker = self.map_widget.set_marker(lat, lon, text=name)
+            markers.append((lat, lon, name, marker))
+            jalur = jalur + [(lat,lon)]
+
+        print(jalur)
+
+        continuous_route = self.map_widget.set_path(jalur, color="blue", width=4)
 
         self.entry = customtkinter.CTkEntry(master=self.frame_right,
                                             placeholder_text="type address")
