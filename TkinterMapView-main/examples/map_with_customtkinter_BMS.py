@@ -1,11 +1,11 @@
 import customtkinter
+from CTkTable import *
 from tkintermapview import TkinterMapView
 # from tower_location_BMS_pointdata import add_new_marker_label
 import tower_location_BMS_pointdata
 from geopy.distance import great_circle
 
 import os
-import tkinter
 from PIL import Image, ImageTk
 
 # customtkinter.set_default_color_theme("bcsvBMS.pylue")
@@ -15,49 +15,10 @@ APP_NAME = "Drone Photos Locator by FarisZ"
 WIDTH = 1000
 HEIGHT = 500
 
-src = "D:\\drone\\New folder\\test\\";
-
-print(os.getcwd());
-os.chdir(src);
-files = sorted(os.listdir());
-
-foto = files[index_foto]
-# self.foto = foto
-from PIL import Image, ImageTk, ExifTags
-import PIL.Image
-img = PIL.Image.open(foto)
-exif = {
-    PIL.ExifTags.TAGS[k]: v
-    for k, v in img._getexif().items()
-    if k in PIL.ExifTags.TAGS
-}
-print(exif['GPSInfo'])
-waktu_drone = exif['DateTime']
-
-south = exif['GPSInfo'][2]
-east = exif['GPSInfo'][4]
-altitude = exif['GPSInfo'][6]
-# print(exif['GPSLatitudeRef'])
-
-print("N:", south, " , E :", east)
-lat_foto = -1 * (((south[0]) + south[1] / 60) + south[2] / 3600)  # convert north to south
-long_foto = (((east[0]) + east[1] / 60) + east[2] / 3600)
-lat_foto, long_foto = float(lat_foto), float(long_foto)
-
-print("file:", foto)
-print("lat,long:", lat_foto, ",", long_foto)
-
 App = customtkinter.CTk() # CTk() serves as the main app window
 App.geometry(str(WIDTH) + "x" + str(HEIGHT)) # Set the initial size of the window
 App.title(APP_NAME) # Set the window title
 App.minsize(WIDTH, HEIGHT)
-
-        # self.protocol("WM_DELETE_WINDOW", self.on_closing)
-        # self.bind("<Command-q>", self.on_closing)
-        # self.bind("<Command-w>", self.on_closing)
-        # self.createcommand('tk::mac::Quit', self.on_closing)
-
-marker_list = []
 # ============ create two CTkFrames ============
 App.grid_columnconfigure(0, weight=0)
 App.grid_columnconfigure(1, weight=1)
@@ -113,6 +74,7 @@ def rename_event():
             img.close()
             os.rename(current_name, new_name)
             print(f"File renamed from '{current_name}' to '{new_name}'")
+            App.destroy()
             # Optional: Update a label in the GUI to confirm success
             # status_label.configure(text=f"Renamed to: {new_name}", text_color="green")
 
@@ -143,7 +105,7 @@ def find_closest_point_to_center():
 
     print(f"Closest point to map center is {name} at {lat:.3f}, {lon:.3f}")
     print(f"Distance: {distance:.2f} KM")
-    return name
+    return name, distance
 
 def on_closing(event=0):
     App.destroy()
@@ -151,7 +113,40 @@ def on_closing(event=0):
 def start():
     App.mainloop()
 
-# change_map("Google satellite")
+marker_list = []
+
+src = "D:\\drone\\New folder\\test\\";
+print(os.getcwd());
+os.chdir(src);
+files = sorted(os.listdir());
+
+foto = files[index_foto]
+# self.foto = foto
+from PIL import Image, ImageTk, ExifTags
+import PIL.ImageTk
+img = PIL.Image.open(foto)
+exif = {
+    PIL.ExifTags.TAGS[k]: v
+    for k, v in img._getexif().items()
+    if k in PIL.ExifTags.TAGS
+}
+print(exif['GPSInfo'])
+waktu_drone = exif['DateTime']
+
+south = exif['GPSInfo'][2]
+east = exif['GPSInfo'][4]
+altitude = exif['GPSInfo'][6]
+# print(exif['GPSLatitudeRef'])
+
+print("N:", south, " , E :", east)
+lat_foto = -1 * (((south[0]) + south[1] / 60) + south[2] / 3600)  # convert north to south
+long_foto = (((east[0]) + east[1] / 60) + east[2] / 3600)
+lat_foto, long_foto = float(lat_foto), float(long_foto)
+
+print("file:", foto)
+print("lat,long:", lat_foto, ",", long_foto)
+
+# change_map("OpenStreetMap")
 # App.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 # ============ frame_left ============
 
@@ -188,63 +183,77 @@ App.frame_right.grid_columnconfigure(1, weight=0)
 App.frame_right.grid_columnconfigure(2, weight=1)
 
 map_widget = TkinterMapView(App.frame_right, corner_radius=0)
+# map_widget.grid(row=1, rowspan=1, column=0, columnspan=3, sticky="nswe", padx=(0, 0), pady=(0, 0))
 map_widget.grid(row=1, rowspan=1, column=0, columnspan=3, sticky="nswe", padx=(0, 0), pady=(0, 0))
 
 map_widget.set_zoom(18)
 # self.map_widget.set_position(-2.13648725 , 101.9292875)
 map_widget.set_position(lat_foto,long_foto)
-map_widget.set_marker(lat_foto, long_foto, text="Titik Drone", text_color="yellow")
-map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-
-# self.map_label = customtkinter.CTkLabel(self.frame_right, text="Drone Capture", anchor="w")
-# self.map_label.grid(row=0, column=3, padx=(40, 40), pady=(20, 0))
+map_widget.set_marker(lat_foto, long_foto, text="Titik Drone", text_color="red")
+# change_map to google satellite
+# map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 
 # self.map_widget2 = TkinterMapView(self.frame_right, corner_radius=0)
 original_image = Image.open(foto) # Load images for light and dark mode
 # Create a CTkImage instance
+# my_image = customtkinter.CTkImage(
+#     light_image=original_image,
+#     dark_image=original_image,
+#     size=(320, 240)
+# )
 my_image = customtkinter.CTkImage(
     light_image=original_image,
     dark_image=original_image,
-    size=(320, 240)
+    size=(120, 90)
 )
 
 # tk_image = ImageTk.PhotoImage(original_image.resize((400, 300)))
 App.map_label2 = customtkinter.CTkLabel(App.frame_right, image=my_image, text="")
-App.map_label2.grid(row=1, rowspan=2, column=3, columnspan=3, sticky="n", padx=(10,10), pady=(10,0))
+# App.map_label2.grid(row=1, rowspan=2, column=3, columnspan=3, sticky="n", padx=(10,10), pady=(10,0))
+App.map_label2.grid(row=1, rowspan=2, column=1, columnspan=2, sticky="n", padx=(10,10), pady=(10,0))
 
-textbox = "File Name: \n" + foto + "\n Capture Datetime: \n" + waktu_drone + "\n Altitude: \n" + str(
-    altitude) + " m"
+markers = []
+jalur = []
+for lat, lon, name in tower_location_BMS_pointdata.points_data:
+    marker = map_widget.set_marker(lat, lon, text=name, text_color="red",marker_color_circle="white",marker_color_outside="gray40")
+    markers.append((lat, lon, name, marker))
+    jalur = jalur + [(lat,lon)]
+
+continuous_route = map_widget.set_path(jalur, color="blue", width=4)
+
+name, distance = find_closest_point_to_center()
+
+textbox = f"File:\n{foto}\n\nDatetime:\n{waktu_drone}\n\nAltitude:\n{altitude} m\n\nClosest Point:\n{name}\n\nDistance:\n{distance:.2f} km"
 App.map_label = customtkinter.CTkLabel(App.frame_right, text=textbox, anchor="e")
-App.map_label.grid(row=1, column=3, sticky="swe", padx=(10,10), pady=(10,10))
+App.map_label.grid(row=1, column=3, sticky="n", padx=(0,0), pady=10)
 
 # Create an Entry widget
 App.entry_widget = customtkinter.CTkEntry(master=App.frame_right,
-                                           placeholder_text="type namefile")
-App.entry_widget.grid(row=2, column=3, sticky="we", padx=(10, 10), pady=(10, 10))
+                                           placeholder_text="Type Namefile")
+App.entry_widget.grid(row=1, column=3, sticky="swe", padx=(10, 10), pady=75)
 # self.entry.bind("<Return>", rename_event(foto,new_namefile))
 
 App.button_entry = customtkinter.CTkButton(master=App.frame_right,
                                         text="Rename",
                                         width=90,
                                         command=rename_event)
-App.button_entry.grid(row=2, column=4, sticky="w", padx=(12, 0), pady=12)
 App.button_entry.bind("<Return>", rename_event)
+App.button_entry.grid(row=1, column=3, sticky="swe", padx=(10,10), pady=45)
 
-App.button_findclosestpoint = customtkinter.CTkButton(master=App.frame_right,
-                                            text="Find Closest",
-                                            width=20,
-                                            command=find_closest_point_to_center)
-App.button_findclosestpoint.grid(row=2, column=5, sticky="w", padx=(5, 0), pady=2)
+App.button_next = customtkinter.CTkButton(master=App.frame_right,
+                                        text="Next",
+                                        width=90,
+                                        command=None)
+App.button_next.grid(row=1, column=3, sticky="swe", padx=(10,10), pady=10)
+
+# App.button_findclosestpoint = customtkinter.CTkButton(master=App.frame_right,
+#                                             text="Find Closest",
+#                                             width=20,
+#                                             command=find_closest_point_to_center)
+# App.button_findclosestpoint.grid(row=2, column=5, sticky="w", padx=(5, 0), pady=2)
+# print("closest : " + find_closest_point_to_center.name)
 
 
-markers = []
-jalur = []
-for lat, lon, name in tower_location_BMS_pointdata.points_data:
-    marker = map_widget.set_marker(lat, lon, text=name, text_color="yellow",marker_color_circle="white",marker_color_outside="gray40")
-    markers.append((lat, lon, name, marker))
-    jalur = jalur + [(lat,lon)]
-
-continuous_route = map_widget.set_path(jalur, color="blue", width=4)
 
 App.entry = customtkinter.CTkEntry(master=App.frame_right,
                                     placeholder_text="type address")
